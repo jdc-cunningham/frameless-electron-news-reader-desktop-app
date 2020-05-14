@@ -13,47 +13,6 @@ const App = () => {
 	const [activeArticles, setActiveArticles] = useState([]); // object
 	// const [slideClass, setSlideClass] = useState("");
 	// const [timeStamp, setTimeStamp] = useState(null);
-	const articlesArr = [
-		{
-			"source": {
-				"id": "cnbc",
-				"name": "CNBC"
-			},
-			"author": "Kevin Breuninger",
-			"title": "Trump says Fauci's warnings about reopening amid coronavirus crisis are not 'acceptable' - CNBC",
-			"description": "Trump did not single out which specific answer from Fauci that he found unacceptable, but referenced Fauci's testimony about reopening schools in the fall.",
-			"url": "https://www.cnbc.com/2020/05/13/coronavirus-trump-says-faucis-warnings-about-reopening-are-not-acceptable.html",
-			"urlToImage": "https://image.cnbcfm.com/api/v1/image/106536026-1589404589412gettyimages-1212895523.jpeg?v=1589404663",
-			"publishedAt": "2020-05-13T22:41:08Z",
-			"content": "Top coronavirus health expert Dr. Anthony Fauci's recent warning about the potentially dire consequences of reopening states and schools too soon was \"not an acceptable answer,\" President Donald Trump said Wednesday.\r\nTrump told reporters at the White House t… [+3242 chars]"
-		},
-		{
-			"source": {
-			  "id": "bbc-news",
-			  "name": "BBC News"
-			},
-			"author": "https://www.facebook.com/bbcnews",
-			"title": "Coronavirus may never go away, World Health Organization warns - BBC News",
-			"description": "Experts say the disease may become embedded in populations in the same way that HIV has.",
-			"url": "https://www.bbc.co.uk/news/world-52643682",
-			"urlToImage": "https://ichef.bbci.co.uk/news/1024/branded_news/12A30/production/_112263367_mediaitem112263363.jpg",
-			"publishedAt": "2020-05-13T22:30:38Z",
-			"content": "Image copyrightReutersImage caption\r\n There are more than 100 potential vaccines currently in development\r\nThe coronavirus \"may never go away\", the World Health Organization (WHO) has warned.\r\nSpeaking at a briefing on Wednesday, WHO emergencies director Dr M… [+1957 chars]"
-		},
-		{
-			"source": {
-				"id": null,
-				"name": "Youtube.com"
-			},
-			"author": null,
-			"title": "Unreal Engine 5 PS5 Tech Demo - Everything You Need To Know In Under 4 Minutes - GameSpot",
-			"description": "Epic Games has announced Unreal Engine 5, releasing a nine-minute tech demo that showed a character and her dancing light exploring caves and ruins. The real...",
-			"url": "https://www.youtube.com/watch?v=UMAP97C0ASU",
-			"urlToImage": "https://i.ytimg.com/vi/UMAP97C0ASU/maxresdefault.jpg",
-			"publishedAt": "2020-05-14T00:30:00Z",
-			"content": "Epic Games has announced Unreal Engine 5, releasing a nine-minute tech demo that showed a character and her dancing light exploring caves and ruins. The real-time demo illustrated the new engine's two core technologies: Nanite and Lumen, which focus on geomet… [+374 chars]"
-		}
-	];
 
 	const [activeSlidesDir, setActiveSlidesDir] = useState({
 		articleIndex: 0,
@@ -117,20 +76,20 @@ const App = () => {
 	}
 
 	const getArticles = () => {
-		// axios.get(newsApiUrl)
-		// 	.then((res) => {
-		// 		console.log(res);
-		// 		if (res.data) {
-		// 			setArticles(res.data.articles);
-		// 		}
-		// 	})
-		// 	.catch((err) => {
-		// 		alert('Failed to get articles');
-		// 		console.log('error:', err);
-		// 		setArticles(null); // shows err state
-		// 	});
-		
-		setArticles(articlesArr);
+		axios.get(newsApiUrl)
+			.then((res) => {
+				console.log(res);
+				if (res.data) {
+					setArticles(
+						res.data.articles.filter(article => article.urlToImage !== null)
+					);
+				}
+			})
+			.catch((err) => {
+				alert('Failed to get articles');
+				console.log('error:', err);
+				setArticles([]); // shows err state with null value maybe
+			});
 	}
 
 	const getArrNeighbors = ( arr, activeIndex ) => {
@@ -164,10 +123,10 @@ const App = () => {
 	}, []);
 
 	useEffect(() => {
-		console.log('slide set', getArrNeighbors(articlesArr,activeSlidesDir.articleIndex));
+		console.log('slide set', getArrNeighbors(articles,activeSlidesDir.articleIndex));
 		setActiveArticles(
 			Array.from(
-				getArrNeighbors(articlesArr,activeSlidesDir.articleIndex).map(articleIndex => articles[articleIndex])
+				getArrNeighbors(articles,activeSlidesDir.articleIndex).map(articleIndex => articles[articleIndex])
 			)
 		);
 		// setTimeout(() => {
@@ -179,6 +138,14 @@ const App = () => {
 		// 	}));
 		// }, 1000);
 	}, [articles, activeSlidesDir.articleIndex]);
+
+	// useEffect(() => {
+	// 	setInterval(() => {
+	// 		if (articles) {
+	// 			nextArticle();
+	// 		}
+	// 	}, 5000);
+	// }, [activeSlidesDir.articleIndex]);
 
 	// useEffect(() => {
 	// 	if (activeSlidesDir.slideClass) {

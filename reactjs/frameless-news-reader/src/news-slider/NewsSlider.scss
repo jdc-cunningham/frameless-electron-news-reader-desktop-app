@@ -84,6 +84,10 @@
         font-size: 20px;
         margin-top: 1rem;
     }
+
+    // enable Electron to move
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
 }
 
 .news-slider__footer {
