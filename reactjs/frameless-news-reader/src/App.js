@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './css-reset.css';
 import './App.css';
 import axios from 'axios';
 import NewsSlider from './news-slider/NewsSlider';
