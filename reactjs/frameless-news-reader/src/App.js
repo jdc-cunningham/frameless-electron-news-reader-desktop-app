@@ -12,7 +12,7 @@ const App = () => {
 	// const [articleIndex, setArticleIndex] = useState(0);
 	const [activeArticles, setActiveArticles] = useState([]); // object
 	// const [slideClass, setSlideClass] = useState("");
-	const [timeStamp, setTimeStamp] = useState(null);
+	// const [timeStamp, setTimeStamp] = useState(null);
 	const articlesArr = [
 		{
 			"source": {
@@ -65,7 +65,7 @@ const App = () => {
 		const incrIndex = dir === "left"; // left means you went right kind of confusing
 		let newArticleIndex;
 
-		console.log('pre ', incrIndex, curArticleIndex, articlesLen);
+		console.log('pre', incrIndex, curArticleIndex, articlesLen);
 
 		if (incrIndex && curArticleIndex === articlesLen - 1) {
 			newArticleIndex = 0;
@@ -78,26 +78,39 @@ const App = () => {
 			newArticleIndex = curArticleIndex - 1;
 		}
 
-		setActiveSlidesDir(prev => ({
-			articeIndex: newArticleIndex,
-			slideClass: incrIndex ? "slide-left" : "slide-right"
-		}));
+		console.log(newArticleIndex);
+		// activeSlidesDirection
+		return newArticleIndex;
 	}
 
 	const prevArticle = () => {
-		getNextArticleIndex(articleIndex, 'right');
-		// setSlideClass("slide-right");
-		// setTimeStamp(Date.now()); // this is a forceUpdate type hack
+		// getNextArticleIndex(activeSlidesDir.articleIndex, 'right');
+		// setActiveSlidesDir(prev => ({
+		// 	...prev,
+		// 	slideClass: "slide-right"
+		// }));
+		setActiveSlidesDir(prev => ({
+			...prev,
+			articleIndex: getNextArticleIndex(activeSlidesDir.articleIndex, "slide-right")
+		}));
 	}
 
 	const nextArticle = () => {
-		getNextArticleIndex(articleIndex, 'left');
-		// setSlideClass("slide-left");
-		// setTimeStamp(Date.now());
+		console.log('next', activeSlidesDir);
+		// getNextArticleIndex(activeSlidesDir.articleIndex, 'left');
+		// setActiveSlidesDir(prev => ({
+		// 	...prev,
+		// 	slideClass: "slide-left"
+		// }));
+		setActiveSlidesDir(prev => ({
+			...prev,
+			articleIndex: getNextArticleIndex(activeSlidesDir.articleIndex, "slide-left")
+		}));
 	}
 
 	const refresh = () => {
 		setActiveSlidesDir(prev => ({
+			...prev,
 			articeIndex: 0
 		}));
 		getArticles();
@@ -121,9 +134,8 @@ const App = () => {
 	}
 
 	const getArrNeighbors = ( arr, activeIndex ) => {
-		const arrLen = arr.length;
-
 		console.log(activeIndex);
+		const arrLen = arr.length;
 	  
 		if (!arrLen || arrLen < 2) {
 			return arr;
@@ -152,20 +164,30 @@ const App = () => {
 	}, []);
 
 	useEffect(() => {
-		console.log('render');
+		console.log('slide set', getArrNeighbors(articlesArr,activeSlidesDir.articleIndex));
 		setActiveArticles(
 			Array.from(
-				getArrNeighbors(articlesArr,articleIndex).map(articleIndex => articles[articleIndex])
+				getArrNeighbors(articlesArr,activeSlidesDir.articleIndex).map(articleIndex => articles[articleIndex])
 			)
 		);
-	}, [articles, articleIndex]);
+		// setTimeout(() => {
+		// 	console.log('timeout set', getArrNeighbors(articlesArr,activeSlidesDir.articleIndex))
+		// 	setActiveSlidesDir(prev => ({
+		// 		...prev,
+		// 		// slideClass: "",
+		// 		articleIndex: getNextArticleIndex(activeSlidesDir.articleIndex, activeSlidesDir.slideClass)
+		// 	}));
+		// }, 1000);
+	}, [articles, activeSlidesDir.articleIndex]);
 
-	useEffect(() => {
-		console.log('slide class');
-		if (slideClass) {
-			getNextArticleIndex(articleIndex);
-		}
-	}, [slideClass, timeStamp]);
+	// useEffect(() => {
+	// 	if (activeSlidesDir.slideClass) {
+	// 		setActiveSlidesDir(prev => ({
+	// 			...prev,
+	// 			articleIndex: getNextArticleIndex(activeSlidesDir.articleIndex, activeSlidesDir.slideClass)
+	// 		}));
+	// 	}
+	// }, [activeSlidesDir.slideClass]);
 
 	// useEffect(() => {
 	// 	setActiveArticles(
@@ -184,7 +206,7 @@ const App = () => {
 				prevArticle={ prevArticle }
 				nextArticle={ nextArticle }
 				refresh={ refresh }
-				slideClass={ slideClass }
+				slideClass={ activeSlidesDir.slideClass }
 			/>
 		</div>
 	);
