@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useForceUpdate } from 'react';
 import './css-reset.css';
 import './App.css';
 import axios from 'axios';
@@ -9,9 +9,10 @@ const App = () => {
 	const newsApiQuery = '/top-headlines/?country=us'
 	const newsApiUrl = process.env.REACT_APP_NEWS_API_BASE_URL + newsApiQuery + '&apiKey=' + process.env.REACT_APP_NEWS_API_KEY;
 	const [articles, setArticles] = useState([]);
-	const [articleIndex, setArticleIndex] = useState(0);
+	// const [articleIndex, setArticleIndex] = useState(0);
 	const [activeArticles, setActiveArticles] = useState([]); // object
-	const [slideClass, setSlideClass] = useState("");
+	// const [slideClass, setSlideClass] = useState("");
+	const [timeStamp, setTimeStamp] = useState(null);
 	const articlesArr = [
 		{
 			"source": {
@@ -54,43 +55,51 @@ const App = () => {
 		}
 	];
 
-	const getNextArticleIndex = ( curArticleIndex ) => {
+	const [activeSlidesDir, setActiveSlidesDir] = useState({
+		articleIndex: 0,
+		slideClass: ""
+	});
+
+	const getNextArticleIndex = ( curArticleIndex, dir ) => {
 		const articlesLen = articles.length;
-		const incrIndex = slideClass.indexOf('left') !== -1; // left means you went right kind of confusing
+		const incrIndex = dir === "left"; // left means you went right kind of confusing
 		let newArticleIndex;
 
 		console.log('pre ', incrIndex, curArticleIndex, articlesLen);
 
 		if (incrIndex && curArticleIndex === articlesLen - 1) {
 			newArticleIndex = 0;
-		}
-
-		if (incrIndex) {
+		} else if (incrIndex) {
 			newArticleIndex = curArticleIndex + 1;
-		}
-
-		if (!incrIndex && curArticleIndex === 0) {
+		} else if (!incrIndex && curArticleIndex === 0) {
 			console.log('here');
 			newArticleIndex = articlesLen - 1;
-		}
-
-		if (!incrIndex) {
+		} else if (!incrIndex) {
 			newArticleIndex = curArticleIndex - 1;
 		}
 
-		setArticleIndex(newArticleIndex);
+		setActiveSlidesDir(prev => ({
+			articeIndex: newArticleIndex,
+			slideClass: incrIndex ? "slide-left" : "slide-right"
+		}));
 	}
 
 	const prevArticle = () => {
-		setSlideClass("slide-right");
+		getNextArticleIndex(articleIndex, 'right');
+		// setSlideClass("slide-right");
+		// setTimeStamp(Date.now()); // this is a forceUpdate type hack
 	}
 
 	const nextArticle = () => {
-		setSlideClass("slide-left");
+		getNextArticleIndex(articleIndex, 'left');
+		// setSlideClass("slide-left");
+		// setTimeStamp(Date.now());
 	}
 
 	const refresh = () => {
-		setArticleIndex(0);
+		setActiveSlidesDir(prev => ({
+			articeIndex: 0
+		}));
 		getArticles();
 	}
 
@@ -143,6 +152,7 @@ const App = () => {
 	}, []);
 
 	useEffect(() => {
+		console.log('render');
 		setActiveArticles(
 			Array.from(
 				getArrNeighbors(articlesArr,articleIndex).map(articleIndex => articles[articleIndex])
@@ -151,10 +161,11 @@ const App = () => {
 	}, [articles, articleIndex]);
 
 	useEffect(() => {
+		console.log('slide class');
 		if (slideClass) {
 			getNextArticleIndex(articleIndex);
 		}
-	}, [slideClass]);
+	}, [slideClass, timeStamp]);
 
 	// useEffect(() => {
 	// 	setActiveArticles(

@@ -13,8 +13,6 @@ const NewsSlider = ({ activeArticles, prevArticle, nextArticle, refresh, slideCl
             urlToImage
         } = articleData;
 
-        console.log(articleData);
-
         return (
             <div key={ slideIndex } className={ slideClass ? `news-slider ${slideClass}` : "news-slider" }>
                 <div
@@ -43,8 +41,6 @@ const NewsSlider = ({ activeArticles, prevArticle, nextArticle, refresh, slideCl
             </div>
         )
     }
-
-    console.log(activeArticles);
 
     const renderArticles = articles => articles.map((article, index) => { return renderSlide(article, index) });
 
