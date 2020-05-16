@@ -1,3 +1,4 @@
+### left/right is not accurate articles order changes
 ### account for image having no image
 ### state problem(no slide)
 ### fix up styling
