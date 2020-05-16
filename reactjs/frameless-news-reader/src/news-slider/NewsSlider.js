@@ -4,7 +4,7 @@ import refreshIcon from "../assets/refresh.svg";
 import leftArrow from "../assets/round-arrow-left.svg";
 import rightArrow from "../assets/round-arrow-right.svg";
 
-const NewsSlider = ({ articles, prevArticle, nextArticle, refresh, slideClass, slideDone }) => {
+const NewsSlider = ({ articles, prevArticle, nextArticle, refresh, slideClass, slideDone, translatePercentage }) => {
     const renderSlide = ( articleData, slideIndex ) => {
         const {
             author,
@@ -12,9 +12,13 @@ const NewsSlider = ({ articles, prevArticle, nextArticle, refresh, slideClass, s
             title,
             urlToImage
         } = articleData;
-
         return (
-            <div key={ slideIndex } className={ slideClass ? `news-slide ${slideClass}` : "news-slide" }>
+            <div
+                style={{
+                    transform: `translateX(${translatePercentage}%)`
+                }}
+                key={ slideIndex }
+                className="news-slide">
                 <div
                     className="news-slider__img"
                     style={{ backgroundImage: `url(${urlToImage})` }}>

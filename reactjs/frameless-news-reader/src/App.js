@@ -3,21 +3,19 @@ import './css-reset.css';
 import './App.css';
 import axios from 'axios';
 import NewsSlider from './news-slider/NewsSlider';
+import workerScript from './worker.js';
 
 const App = () => {
-
+    console.log('app');
 	const newsApiQuery = '/top-headlines/?country=us'
-	const newsApiUrl = process.env.REACT_APP_NEWS_API_BASE_URL + newsApiQuery + '&apiKey=' + process.env.REACT_APP_NEWS_API_KEY;
-    // const [articles, setArticles] = useState(null);
-    // const [slideClass, setSlideClass] = useState("");
-    // const [slideDone, setSlideDone] = useState(true);
+    const newsApiUrl = process.env.REACT_APP_NEWS_API_BASE_URL + newsApiQuery + '&apiKey=' + process.env.REACT_APP_NEWS_API_KEY;
+    const [articles, setArticles] = useState([]);
+    // let translatePercentage = "0"; // this is used to slide the long set of slides
+    const [translatePercentage, setTranslatePercentage] = useState(0);
+    const [slideInterval, setSlideInterval] = useState(null);
+    const [worker, setWorker] = useState(null);
+    const localStorage = window.localStorage;
 
-    const [sliderState, setSliderState] = useState({
-        articles: null,
-        slideClass: "",
-        slideDone: true
-    });
-    
     // tmp
     const articlesArr = [
         {
@@ -61,140 +59,122 @@ const App = () => {
         }
     ];
 
-    const shiftArticles = ( left ) => {
-        let arrCopy;
-
-        if (left) {
-            arrCopy = [...sliderState.articles];
-            arrCopy.shift();
-            arrCopy.push(sliderState.articles[0]);
-        } else {
-            arrCopy = [...sliderState.articles];
-            arrCopy.pop();
-            arrCopy.unshift(sliderState.articles[sliderState.articles.length - 1]);
-        }
-        
-        return arrCopy;
-    }
-
     const prevArticle = () => {
-        // if (!slideDone) {
-        //     return;
-        // }
-        //   setSlideDone(false);
-        // setSliderState(prev => ({
-        //     ...prev,
-        //     slideDone: false
-        // }));
-        setSliderState(prev => ({
-            ...prev,
-            slideDone: false,
-            slideClass: "slide-right"
-        }));
-        // setArticles(arrCopy);
+        if (translatePercentage < ((articles.length * 100) - 100)) { // when end of slides reached
+            setTranslatePercentage(translatePercentage + 100);
+        }
+
+        if (translatePercentage === 0) {
+            console.log('left edge', (articles.length * -100) + 100);
+            setTranslatePercentage((articles.length * -100) + 100);
+        }
     }
 
     const nextArticle = () => {
-        // if (!slideDone) {
-        //     return;
-        // }
-        // slideDir = "left";
-        // setSlideDone(false);
-        // console.log(articles);
-        // setSliderState(prev => ({
-        //     ...prev,
-        //     slideDone: false
-        // }));
-        
-        setSliderState(prev => ({
-            ...prev,
-            slideDone: false,
-            slideClass: "slide-left"
-        }));
-        // setArticles(arrCopy);
-	}
+        console.log('state', articles);
+        console.log(translatePercentage > ((articles.length * -100) + 100));
+        console.log(translatePercentage, ((articles.length * -100) + 100), articles.length);
+        if (translatePercentage === 0 || translatePercentage > ((articles.length * -100) + 100)) { // when end of slides reached
+            setTranslatePercentage(translatePercentage - 100);
+        }
 
-	const refresh = () => {
+        if (translatePercentage === ((articles.length * -100) + 100)) {
+            setTranslatePercentage(0);
+        }
+    }
+
+    const refresh = () => {
 		getArticles();
     }
     
     const getArticles = () => {
-        setSliderState(prev => ({
-            ...prev,
-            articles: articlesArr
-        }));
+        // setSliderState(prev => ({
+        //     ...prev,
+        //     articles: articlesArr
+        // }));
+        setArticles(articlesArr);
     }
 
-    useEffect(() => {
-        const slideClass = sliderState.slideClass;
-        if (slideClass) { // this still runs on load somehow
-            // this is a weird thing where it slides faster in one direction than the other
-            if (slideClass === "slide-left") {
-                console.log('left');
-                setTimeout(() => {
-                    setSliderState(prev => ({
-                        ...prev,
-                        slideClass: "",
-                        slideDone: true,
-                    }));
-                }, 1000);
-                setTimeout(() => {
-                    setSliderState(prev => ({
-                        ...prev,
-                        articles: slideClass === "slide-left" ? shiftArticles(true) : shiftArticles(false)
-                    }));
-                }, 1050);
-            } else {
-                console.log('right');
-                setTimeout(() => {
-                    setSliderState(prev => ({
-                        ...prev,
-                        slideClass: "",
-                        slideDone: true,
-                    }));
-                }, 1000);
-                setTimeout(() => {
-                    setSliderState(prev => ({
-                        ...prev,
-                        articles: slideClass === "slide-left" ? shiftArticles(true) : shiftArticles(false)
-                    }));
-                }, 1050);
-            }
-        }
-    }, [sliderState.slideClass]);
+    // https://stackoverflow.com/questions/8083410/how-can-i-set-the-default-timezone-in-node-js
+    const getDate = () => {
+        process.env.TZ = "America/Chicago";
+        let date_ob = new Date();
+        let date = ("0" + date_ob.getDate()).slice(-2);
+        // current month
+        let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+        // current year
+        let year = date_ob.getFullYear();
+        return month + "-" + date + "-" + year;
+    };
 
-    // get articles on load
+    // https://stackoverflow.com/questions/8888491/how-do-you-display-javascript-datetime-in-12-hour-am-pm-format
+    const getTime = () => {
+        const date = new Date;
+        let hours = date.getHours();
+        let minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        const strTime = hours + ':' + minutes + ' ' + ampm;
+        return strTime;
+    }
+
+    // just hits next or refresh to get new articles
+    const workerCallback = (secGained) => {
+        process.env.TZ = "America/Chicago";
+        const curTime = getTime();
+        const curDate = getDate();
+
+        console.log(curTime);
+
+        if (curTime === '4:09 pm') { // it's possible this will never run, hence manual refresh icon
+            console.log('in');
+            if (!localStorage.getItem(curDate)) { // since the 10 second interval means this check can run 6 times
+                localStorage.setItem(curDate, 'refreshed');
+                setTranslatePercentage(0);
+                getArticles();
+            }
+        } else {
+            console.log('next');
+            nextArticle();
+        }
+    };
+
+    // runs once on load
     useEffect(() => {
-        console.log(articlesArr);
-        setSliderState(prev => ({
-            ...prev,
-            articles: articlesArr
-        }));
-		// axios.get(newsApiUrl)
-		// 	.then((res) => {
-		// 		console.log(res);
-		// 		if (res.data) {
-		// 			setArticles(
-		// 				res.data.articles.filter(article => article.urlToImage !== null)
-		// 			);
-		// 		}
-		// 	})
-		// 	.catch((err) => {
-		// 		alert('Failed to get articles');
-		// 		console.log('error:', err);
-		// 		setArticles([]); // shows err state with null value maybe
-		// 	});
+        // setSlideInterval(
+        //     setInterval(() => {
+        //         nextArticle();
+        //     }, 10000)
+        // );
+
+        // this worker fires every 10 seconds
+        if (!worker && window.Worker) {
+            var workerClock = new Worker(workerScript);
+            getArticles();
+            setWorker(workerClock);
+            workerClock.onmessage = (msg) => {
+                workerCallback(msg.data);
+            };
+        } else {
+            alert('Unable to automatically slide');
+            console.log('web worker not available');
+        }
     }, []);
 
     return (
         <div className="app">
             <NewsSlider
-                articles={ sliderState.articles }
+                articles={ articles }
+                // articles={ sliderState.articles }
                 prevArticle={ prevArticle }
                 nextArticle={ nextArticle }
                 refresh={ refresh }
-                slideClass={ sliderState.slideClass }
-                slideDone={ sliderState.slideDone }
+                translatePercentage={ translatePercentage }
+                // slideClass={ sliderState.slideClass }
+                // slideDone={ sliderState.slideDone }
+                slideDone={ true }
             />
         </div>
     );

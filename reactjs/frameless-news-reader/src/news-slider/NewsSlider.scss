@@ -11,7 +11,7 @@
     height: 100vh;
     max-height: 500px;
     text-shadow:1px 1px #383838;
-    transform: translateX(-100%);
+    transition: all 1s ease-in-out;
 
     @keyframes left {
         0% { transform: translateX(0) }
