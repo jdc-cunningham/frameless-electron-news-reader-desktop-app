@@ -5,6 +5,14 @@ import leftArrow from "../assets/round-arrow-left.svg";
 import rightArrow from "../assets/round-arrow-right.svg";
 
 const NewsSlider = ({ articles, prevArticle, nextArticle, refresh, slideClass, slideDone, translatePercentage }) => {
+    const getFullImgSrc = ( imgSrc ) => {
+        if (imgSrc.indexOf('&pid=') !== -1) {
+            return imgSrc.split('&pid=')[0];
+        }
+
+        return imgSrc;
+    }
+
     const renderSlide = ( articleData, slideIndex ) => {
         return (
             <div
@@ -15,7 +23,7 @@ const NewsSlider = ({ articles, prevArticle, nextArticle, refresh, slideClass, s
                 className="news-slide">
                 <div
                     className="news-slider__img"
-                    style={{ backgroundImage: `url(${articleData.image.thumbnail.contentUrl})` }}>
+                    style={{ backgroundImage: `url(${ getFullImgSrc(articleData.image.thumbnail.contentUrl) })` }}>
                     <button type="button" className="news-slider__img-btn" onClick={ prevArticle } disabled={ slideDone ? false : true }>
                         <img src={ leftArrow } className="news-slider__img-arrow" alt="left arrow icon" />
                     </button>
