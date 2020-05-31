@@ -16,49 +16,6 @@ const App = () => {
     const [worker, setWorker] = useState(null);
     const localStorage = window.localStorage;
 
-    // tmp
-    const articlesArr = [
-        {
-          "source": {
-            "id": "cbs-news",
-            "name": "CBS News"
-          },
-          "author": "Jonathan LaPook",
-          "title": "Monkey trial of Oxford vaccine shows encouraging results - CBS News",
-          "description": "When they exposed the animals to coronavirus, the monkeys that weren't vaccinated developed pneumonia, a sign of COVID-19 — but those that weren't vaccinated did not.",
-          "url": "https://www.cbsnews.com/news/oxford-university-monkey-trial-of-coronavirus-vaccine-shows-encouraging-results/",
-          "urlToImage": "https://cbsnews3.cbsistatic.com/hub/i/r/2020/03/06/d80375f7-4e18-42a7-b0eb-fd046572f15b/thumbnail/1200x630/56b5ba089898040c60f907710f3c2412/rts301gn.jpg",
-          "publishedAt": "2020-05-16T00:30:32Z",
-          "content": "The director of the National Institutes of Health (NIH) has said that no corners will be cut in the search for a coronavirus vaccine. But now, there's encouraging news about a potential vaccine that's now being tested on humans and monkeys. \r\nNIH researchers … [+1607 chars]"
-        },
-        {
-          "source": {
-            "id": null,
-            "name": "Huffpost.com"
-          },
-          "author": "Carly Ledbetter",
-          "title": "Meghan Markle, Prince Harry Surprised A Bunch Of People During A Zoom Meeting - HuffPost",
-          "description": "The royal couple's first joint appearance since their Los Angeles move left one man \"shocked.\"",
-          "url": "https://www.huffpost.com/entry/meghan-markle-prince-harry-zoom-meeting_n_5ebdb64bc5b698a290459a6e",
-          "urlToImage": "https://img.huffingtonpost.com/asset/5ebef52b2200006916828d20.jpeg?cache=vohv82opWy&ops=1200_630",
-          "publishedAt": "2020-05-16T00:22:22Z",
-          "content": "Meghan Markle and Prince Harry can really liven up a work meeting. \r\nThe Duke and Duchess of Sussex, who are currently self-isolating at their home in Los Angeles and calling members of their patronages over Zoom, surprised members of the Crisis Text Line tea… [+1894 chars]"
-        },
-        {
-          "source": {
-            "id": null,
-            "name": "Nytimes.com"
-          },
-          "author": "Sapna Maheshwari, Michael Corkery",
-          "title": "J.C. Penney Files for Bankruptcy, Closing Some Stores - The New York Times",
-          "description": "The chain’s move came after J. Crew and the Neiman Marcus Group filed, and represented the biggest casualty amid retail closures tied to the coronavirus pandemic.",
-          "url": "https://www.nytimes.com/2020/05/15/business/jc-penney-bankruptcy-coronavirus.html",
-          "urlToImage": "https://static01.nyt.com/images/2020/05/16/business/15virus-jcpenney-print/15virus-jcpenney-4-facebookJumbo.jpg",
-          "publishedAt": "2020-05-15T23:43:17Z",
-          "content": "J.C. Penney, with its budget-friendly clothing for families and reliable home furnishings, was for years a cornerstone of American malls and an undeniable success story. What started as a humble dry goods store in Wyoming in 1902 was a century later a nationa… [+6780 chars]"
-        }
-    ];
-
     const prevArticle = () => {
         if (translatePercentage < ((articles.length * 100) - 100)) { // when end of slides reached
             setTranslatePercentage(translatePercentage + 100);
@@ -88,11 +45,21 @@ const App = () => {
     }
     
     const getArticles = () => {
-        // setSliderState(prev => ({
-        //     ...prev,
-        //     articles: articlesArr
-        // }));
-        setArticles(articlesArr);
+        var data = null;
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === this.DONE) {
+                setArticles(JSON.parse(this.responseText).value);
+            }
+        });
+
+        xhr.open("GET", "https://microsoft-azure-bing-news-search-v1.p.rapidapi.com/");
+        xhr.setRequestHeader("x-rapidapi-host", "microsoft-azure-bing-news-search-v1.p.rapidapi.com");
+        xhr.setRequestHeader("x-rapidapi-key", process.env.REACT_APP_RAPID_API_KEY);
+
+        xhr.send(data);
     }
 
     // https://stackoverflow.com/questions/8083410/how-can-i-set-the-default-timezone-in-node-js
@@ -150,17 +117,18 @@ const App = () => {
         // );
 
         // this worker fires every 10 seconds
-        if (!worker && window.Worker) {
-            var workerClock = new Worker(workerScript);
-            getArticles();
-            setWorker(workerClock);
-            workerClock.onmessage = (msg) => {
-                workerCallback(msg.data);
-            };
-        } else {
-            alert('Unable to automatically slide');
-            console.log('web worker not available');
-        }
+        // if (!worker && window.Worker) {
+        //     var workerClock = new Worker(workerScript);
+        //     getArticles();
+        //     setWorker(workerClock);
+        //     workerClock.onmessage = (msg) => {
+        //         workerCallback(msg.data);
+        //     };
+        // } else {
+        //     alert('Unable to automatically slide');
+        //     console.log('web worker not available');
+        // }
+        getArticles();
     }, []);
 
     return (

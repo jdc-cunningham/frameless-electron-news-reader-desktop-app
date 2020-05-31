@@ -6,12 +6,6 @@ import rightArrow from "../assets/round-arrow-right.svg";
 
 const NewsSlider = ({ articles, prevArticle, nextArticle, refresh, slideClass, slideDone, translatePercentage }) => {
     const renderSlide = ( articleData, slideIndex ) => {
-        const {
-            author,
-            description,
-            title,
-            urlToImage
-        } = articleData;
         return (
             <div
                 style={{
@@ -21,7 +15,7 @@ const NewsSlider = ({ articles, prevArticle, nextArticle, refresh, slideClass, s
                 className="news-slide">
                 <div
                     className="news-slider__img"
-                    style={{ backgroundImage: `url(${urlToImage})` }}>
+                    style={{ backgroundImage: `url(${articleData.image.thumbnail.contentUrl})` }}>
                     <button type="button" className="news-slider__img-btn" onClick={ prevArticle } disabled={ slideDone ? false : true }>
                         <img src={ leftArrow } className="news-slider__img-arrow" alt="left arrow icon" />
                     </button>
@@ -30,14 +24,14 @@ const NewsSlider = ({ articles, prevArticle, nextArticle, refresh, slideClass, s
                     </button>
                 </div>
                 <div className="news-slider__body">
-                    <h1>{ title }</h1>
-                    <p>{ description }</p>
+                    <h1>{ articleData.name }</h1>
+                    <p>{ articleData.description }</p>
                 </div>
                 <div className="news-slider__footer">
                     <button title="refresh" type="button" className="news-slider__footer-refresh" onClick={ refresh } disabled={ slideDone ? false : true }>
                         <img src={ refreshIcon } alt="refresh icon" className="news-slider__footer-refresh-icon" />
                     </button>
-                    <p>{ author }</p>
+                    <p>{ articleData.provider.name }</p>
                 </div>
                 <div className="news-slider__news-api-attr">
                     <a href="https://newsapi.org">Powered by News API</a>
