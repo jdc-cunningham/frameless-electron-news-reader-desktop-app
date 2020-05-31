@@ -41,9 +41,6 @@ const NewsSlider = ({ articles, prevArticle, nextArticle, refresh, slideClass, s
                     </button>
                     <p>{ articleData.provider.name }</p>
                 </div>
-                <div className="news-slider__news-api-attr">
-                    <a href="https://newsapi.org">Powered by News API</a>
-                </div>
             </div>
         )
     }
