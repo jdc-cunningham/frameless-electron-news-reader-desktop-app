@@ -39,7 +39,7 @@ const NewsSlider = ({ articles, prevArticle, nextArticle, refresh, slideClass, s
                     <button title="refresh" type="button" className="news-slider__footer-refresh" onClick={ refresh } disabled={ slideDone ? false : true }>
                         <img src={ refreshIcon } alt="refresh icon" className="news-slider__footer-refresh-icon" />
                     </button>
-                    <p>{ articleData.provider.name }</p>
+                    <p>{ articleData.provider[0].name }</p>
                 </div>
             </div>
         )
